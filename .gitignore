@@ -1,0 +1,48 @@
+# Python cache and bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python tooling
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Local environment files
+.env
+.env.*
+
+# Logs
+*.log
+
+# Frontend dependencies and build output
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.vite-temp/
+frontend/*.tsbuildinfo
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Model artifact binaries (large trained model files)
+backend/model_artifacts/*.pt
+backend/model_artifacts/*.joblib
+
+# Raw dataset (TCGA data, not redistributable)
+data/
+
+# Generated plots and figures
+plots/
