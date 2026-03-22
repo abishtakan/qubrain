@@ -1,9 +1,13 @@
 import axios from 'axios';
 
-const apiHost = typeof window !== 'undefined' ? window.location.hostname : '127.0.0.1';
+// Use the VITE_API_URL environment variable if set, otherwise fall back to
+// the default local development address. Set VITE_API_URL in a .env file
+// (see frontend/.env.example) when the backend runs on a different host/port.
+const API_BASE_URL: string =
+  (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://127.0.0.1:8010';
 
 const api = axios.create({
-  baseURL: `http://${apiHost}:8010`,
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },

@@ -1,3 +1,14 @@
+"""
+Simple in-memory session authentication for the QuBrain demo frontend.
+
+IMPORTANT LIMITATIONS:
+- Sessions are stored in a plain Python dict (in-memory only).
+- All sessions are lost when the server process restarts.
+- This is intentionally simple for a single-user research prototype.
+- It is NOT suitable for multi-user or production deployments, which would
+  require a persistent session store (e.g. Redis, database-backed tokens, or
+  a proper JWT implementation).
+"""
 from __future__ import annotations
 
 import secrets

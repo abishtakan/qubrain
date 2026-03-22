@@ -57,7 +57,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Alive",
-    "mortality_probability": 0.19232653081417084
+    "mortality_probability": 0.1925070881843567
   },
   {
     "patient_index": 1,
@@ -117,7 +117,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.5473492741584778
+    "mortality_probability": 0.5469774603843689
   },
   {
     "patient_index": 2,
@@ -177,7 +177,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Alive",
-    "mortality_probability": 0.4864233434200287
+    "mortality_probability": 0.48682838678359985
   },
   {
     "patient_index": 3,
@@ -237,7 +237,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.7859972715377808
+    "mortality_probability": 0.7859551906585693
   },
   {
     "patient_index": 4,
@@ -297,7 +297,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Alive",
-    "mortality_probability": 0.2873888909816742
+    "mortality_probability": 0.2872999906539917
   },
   {
     "patient_index": 5,
@@ -357,7 +357,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Alive",
-    "mortality_probability": 0.2658332884311676
+    "mortality_probability": 0.2655966579914093
   },
   {
     "patient_index": 6,
@@ -417,7 +417,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.7518559098243713
+    "mortality_probability": 0.7517893314361572
   },
   {
     "patient_index": 7,
@@ -477,7 +477,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.7205280661582947
+    "mortality_probability": 0.7202666401863098
   },
   {
     "patient_index": 8,
@@ -537,7 +537,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Alive",
-    "mortality_probability": 0.2937012314796448
+    "mortality_probability": 0.29344481229782104
   },
   {
     "patient_index": 9,
@@ -597,7 +597,7 @@
     },
     "actual_status": "Alive",
     "predicted_status": "Dead",
-    "mortality_probability": 0.7921628952026367
+    "mortality_probability": 0.7921274900436401
   },
   {
     "patient_index": 10,
@@ -657,7 +657,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Alive",
-    "mortality_probability": 0.4481436014175415
+    "mortality_probability": 0.44861653447151184
   },
   {
     "patient_index": 11,
@@ -717,7 +717,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.7974582314491272
+    "mortality_probability": 0.7974398732185364
   },
   {
     "patient_index": 12,
@@ -777,7 +777,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.6429857611656189
+    "mortality_probability": 0.6432331204414368
   },
   {
     "patient_index": 13,
@@ -837,7 +837,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.8050543665885925
+    "mortality_probability": 0.8050516843795776
   },
   {
     "patient_index": 14,
@@ -897,7 +897,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Alive",
-    "mortality_probability": 0.2590343654155731
+    "mortality_probability": 0.2588500678539276
   },
   {
     "patient_index": 15,
@@ -957,7 +957,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.6638649702072144
+    "mortality_probability": 0.6637712121009827
   },
   {
     "patient_index": 16,
@@ -1017,7 +1017,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Alive",
-    "mortality_probability": 0.48727598786354065
+    "mortality_probability": 0.487118661403656
   },
   {
     "patient_index": 17,
@@ -1077,7 +1077,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.7655500173568726
+    "mortality_probability": 0.765499472618103
   },
   {
     "patient_index": 18,
@@ -1137,7 +1137,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.7744811773300171
+    "mortality_probability": 0.7744419574737549
   },
   {
     "patient_index": 19,
@@ -1197,7 +1197,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Alive",
-    "mortality_probability": 0.4051930606365204
+    "mortality_probability": 0.4048304855823517
   },
   {
     "patient_index": 20,
@@ -1257,7 +1257,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Alive",
-    "mortality_probability": 0.21557383239269257
+    "mortality_probability": 0.21578563749790192
   },
   {
     "patient_index": 21,
@@ -1317,7 +1317,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.7071371078491211
+    "mortality_probability": 0.7068905830383301
   },
   {
     "patient_index": 22,
@@ -1377,7 +1377,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Alive",
-    "mortality_probability": 0.28114446997642517
+    "mortality_probability": 0.28110066056251526
   },
   {
     "patient_index": 23,
@@ -1437,7 +1437,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.543578028678894
+    "mortality_probability": 0.5432155132293701
   },
   {
     "patient_index": 24,
@@ -1497,7 +1497,7 @@
     },
     "actual_status": "Alive",
     "predicted_status": "Alive",
-    "mortality_probability": 0.29876846075057983
+    "mortality_probability": 0.2984521985054016
   },
   {
     "patient_index": 25,
@@ -1557,7 +1557,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Alive",
-    "mortality_probability": 0.33283913135528564
+    "mortality_probability": 0.3330507278442383
   },
   {
     "patient_index": 26,
@@ -1617,7 +1617,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.8269518613815308
+    "mortality_probability": 0.8269340991973877
   },
   {
     "patient_index": 27,
@@ -1677,7 +1677,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Alive",
-    "mortality_probability": 0.39437317848205566
+    "mortality_probability": 0.39397910237312317
   },
   {
     "patient_index": 28,
@@ -1737,7 +1737,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.7631472945213318
+    "mortality_probability": 0.7629924416542053
   },
   {
     "patient_index": 29,
@@ -1797,7 +1797,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.715465247631073
+    "mortality_probability": 0.7151657342910767
   },
   {
     "patient_index": 30,
@@ -1857,7 +1857,7 @@
     },
     "actual_status": "Alive",
     "predicted_status": "Dead",
-    "mortality_probability": 0.5241801738739014
+    "mortality_probability": 0.5237603783607483
   },
   {
     "patient_index": 31,
@@ -1917,7 +1917,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Alive",
-    "mortality_probability": 0.4807712435722351
+    "mortality_probability": 0.48036840558052063
   },
   {
     "patient_index": 32,
@@ -1977,7 +1977,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.7707539200782776
+    "mortality_probability": 0.7706429362297058
   },
   {
     "patient_index": 33,
@@ -2037,7 +2037,7 @@
     },
     "actual_status": "Alive",
     "predicted_status": "Alive",
-    "mortality_probability": 0.12364784628152847
+    "mortality_probability": 0.12368518114089966
   },
   {
     "patient_index": 34,
@@ -2097,7 +2097,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.7112788558006287
+    "mortality_probability": 0.7110351920127869
   },
   {
     "patient_index": 35,
@@ -2157,7 +2157,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.6653395891189575
+    "mortality_probability": 0.6650156378746033
   },
   {
     "patient_index": 36,
@@ -2217,7 +2217,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.8362134099006653
+    "mortality_probability": 0.8362347483634949
   },
   {
     "patient_index": 37,
@@ -2277,7 +2277,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.7935044169425964
+    "mortality_probability": 0.7935149073600769
   },
   {
     "patient_index": 38,
@@ -2337,7 +2337,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.7959223985671997
+    "mortality_probability": 0.7958823442459106
   },
   {
     "patient_index": 39,
@@ -2397,7 +2397,7 @@
     },
     "actual_status": "Alive",
     "predicted_status": "Alive",
-    "mortality_probability": 0.370347261428833
+    "mortality_probability": 0.37081921100616455
   },
   {
     "patient_index": 40,
@@ -2457,7 +2457,7 @@
     },
     "actual_status": "Alive",
     "predicted_status": "Alive",
-    "mortality_probability": 0.3817577064037323
+    "mortality_probability": 0.3816334307193756
   },
   {
     "patient_index": 41,
@@ -2517,7 +2517,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.6403262615203857
+    "mortality_probability": 0.6401716470718384
   },
   {
     "patient_index": 42,
@@ -2577,7 +2577,7 @@
     },
     "actual_status": "Alive",
     "predicted_status": "Alive",
-    "mortality_probability": 0.44059693813323975
+    "mortality_probability": 0.44049838185310364
   },
   {
     "patient_index": 43,
@@ -2637,7 +2637,7 @@
     },
     "actual_status": "Alive",
     "predicted_status": "Alive",
-    "mortality_probability": 0.4538836181163788
+    "mortality_probability": 0.4543672800064087
   },
   {
     "patient_index": 44,
@@ -2697,7 +2697,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Alive",
-    "mortality_probability": 0.3768600523471832
+    "mortality_probability": 0.3764422833919525
   },
   {
     "patient_index": 45,
@@ -2757,7 +2757,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.7561671137809753
+    "mortality_probability": 0.7560749053955078
   },
   {
     "patient_index": 46,
@@ -2817,7 +2817,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.6986858248710632
+    "mortality_probability": 0.6983401775360107
   },
   {
     "patient_index": 47,
@@ -2877,7 +2877,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.7694015502929688
+    "mortality_probability": 0.7693479061126709
   },
   {
     "patient_index": 48,
@@ -2937,7 +2937,7 @@
     },
     "actual_status": "Alive",
     "predicted_status": "Dead",
-    "mortality_probability": 0.8460794687271118
+    "mortality_probability": 0.8460800647735596
   },
   {
     "patient_index": 49,
@@ -2997,7 +2997,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Alive",
-    "mortality_probability": 0.39756661653518677
+    "mortality_probability": 0.39807698130607605
   },
   {
     "patient_index": 50,
@@ -3057,7 +3057,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.7793916463851929
+    "mortality_probability": 0.7793962955474854
   },
   {
     "patient_index": 51,
@@ -3117,7 +3117,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.8009620904922485
+    "mortality_probability": 0.8009024858474731
   },
   {
     "patient_index": 52,
@@ -3177,7 +3177,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.5359632968902588
+    "mortality_probability": 0.5358529686927795
   },
   {
     "patient_index": 53,
@@ -3237,7 +3237,7 @@
     },
     "actual_status": "Alive",
     "predicted_status": "Alive",
-    "mortality_probability": 0.16932931542396545
+    "mortality_probability": 0.16935525834560394
   },
   {
     "patient_index": 54,
@@ -3297,7 +3297,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.6665035486221313
+    "mortality_probability": 0.6663836240768433
   },
   {
     "patient_index": 55,
@@ -3357,7 +3357,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.7893562316894531
+    "mortality_probability": 0.7893026471138
   },
   {
     "patient_index": 56,
@@ -3417,7 +3417,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.8144289255142212
+    "mortality_probability": 0.8144468069076538
   },
   {
     "patient_index": 57,
@@ -3477,7 +3477,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.7558609843254089
+    "mortality_probability": 0.7558627724647522
   },
   {
     "patient_index": 58,
@@ -3537,7 +3537,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.7969383597373962
+    "mortality_probability": 0.7969201803207397
   },
   {
     "patient_index": 59,
@@ -3597,7 +3597,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Alive",
-    "mortality_probability": 0.4064481556415558
+    "mortality_probability": 0.4066476821899414
   },
   {
     "patient_index": 60,
@@ -3657,7 +3657,7 @@
     },
     "actual_status": "Alive",
     "predicted_status": "Alive",
-    "mortality_probability": 0.18073411285877228
+    "mortality_probability": 0.1807098537683487
   },
   {
     "patient_index": 61,
@@ -3717,7 +3717,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Alive",
-    "mortality_probability": 0.43230322003364563
+    "mortality_probability": 0.4321577847003937
   },
   {
     "patient_index": 62,
@@ -3777,7 +3777,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Alive",
-    "mortality_probability": 0.3582994341850281
+    "mortality_probability": 0.35863471031188965
   },
   {
     "patient_index": 63,
@@ -3837,7 +3837,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Alive",
-    "mortality_probability": 0.30301615595817566
+    "mortality_probability": 0.30289965867996216
   },
   {
     "patient_index": 64,
@@ -3897,7 +3897,7 @@
     },
     "actual_status": "Alive",
     "predicted_status": "Alive",
-    "mortality_probability": 0.29074013233184814
+    "mortality_probability": 0.29113584756851196
   },
   {
     "patient_index": 65,
@@ -3957,7 +3957,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Alive",
-    "mortality_probability": 0.4329569637775421
+    "mortality_probability": 0.43258488178253174
   },
   {
     "patient_index": 66,
@@ -4017,7 +4017,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.8255125880241394
+    "mortality_probability": 0.825487494468689
   },
   {
     "patient_index": 67,
@@ -4077,7 +4077,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Alive",
-    "mortality_probability": 0.3975367844104767
+    "mortality_probability": 0.3974151909351349
   },
   {
     "patient_index": 68,
@@ -4137,7 +4137,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.7869253754615784
+    "mortality_probability": 0.7868445515632629
   },
   {
     "patient_index": 69,
@@ -4197,7 +4197,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.7630720734596252
+    "mortality_probability": 0.763004720211029
   },
   {
     "patient_index": 70,
@@ -4257,7 +4257,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.6564924120903015
+    "mortality_probability": 0.6564132571220398
   },
   {
     "patient_index": 71,
@@ -4317,7 +4317,7 @@
     },
     "actual_status": "Alive",
     "predicted_status": "Alive",
-    "mortality_probability": 0.15889762341976166
+    "mortality_probability": 0.1590307503938675
   },
   {
     "patient_index": 72,
@@ -4377,7 +4377,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.7158902883529663
+    "mortality_probability": 0.7158190011978149
   },
   {
     "patient_index": 73,
@@ -4437,7 +4437,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Alive",
-    "mortality_probability": 0.3489597737789154
+    "mortality_probability": 0.3486574590206146
   },
   {
     "patient_index": 74,
@@ -4497,7 +4497,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.7912158370018005
+    "mortality_probability": 0.7912052273750305
   },
   {
     "patient_index": 75,
@@ -4557,7 +4557,7 @@
     },
     "actual_status": "Dead",
     "predicted_status": "Dead",
-    "mortality_probability": 0.8030579686164856
+    "mortality_probability": 0.8030886650085449
   },
   {
     "patient_index": 76,
@@ -4617,6 +4617,6 @@
     },
     "actual_status": "Alive",
     "predicted_status": "Alive",
-    "mortality_probability": 0.3186386823654175
+    "mortality_probability": 0.31832432746887207
   }
 ]

@@ -54,10 +54,16 @@ What you must never do:
 - oversample before cross-validation splitting
 - tune thresholds on the test set
 
-Important note for this repository:
+**Current implementation status (updated):**
 
-- the current `qubrain` trainer does **not** yet use SMOTE or a weighted loss
-- this is one reason the hybrid AUC is lower than the older research scripts
+The current `qubrain` trainer in `scripts/train_model.py` **fully implements** both strategies via `apply_imbalance_strategy()`:
+
+- `"smote"` — applies `SMOTE` from `imbalanced-learn` inside training folds only
+- `"class_weight"` — computes inverse-frequency class weights applied via `EntropyRegularizedBCELoss`
+- Both strategies are explored in the hyperparameter search space
+- The winning configuration's imbalance strategy is applied for final training
+
+The earlier note in this file claiming balancing was not yet implemented was **outdated** and has been corrected.
 
 ## 4. Tokenization / Vectorization / Vectorization Techniques
 

@@ -95,7 +95,8 @@ function App() {
   const [authLoading, setAuthLoading] = useState(true);
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginUsername, setLoginUsername] = useState('oncologist');
-  const [loginPassword, setLoginPassword] = useState('qubrain-demo-2026');
+  // Password is intentionally left blank — do not pre-fill credentials in source code.
+  const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState<string | null>(null);
   const [metadata, setMetadata] = useState<Metadata | null>(null);
   const [metadataLoading, setMetadataLoading] = useState(true);
@@ -249,30 +250,63 @@ function App() {
   const processImportText = (text: string) => {
     if (!metadata) return;
     try {
-      let imported: Record<string, any> = {};
+      let geneMap: Record<string, any> = {};
       const trimmed = text.trim();
 
       if (trimmed.startsWith('{')) {
-        imported = JSON.parse(trimmed);
+        const parsed = JSON.parse(trimmed);
+        if (parsed.genes && typeof parsed.genes === 'object') {
+          geneMap = { ...parsed.genes, age: parsed.age, gender: parsed.gender };
+        } else {
+          geneMap = parsed;
+        }
       } else {
-        trimmed.split('\n').forEach((line: string) => {
-          const parts = line.split(/[ ,:\t]+/).filter(Boolean);
-          if (parts.length >= 2) {
-            imported[parts[0].toUpperCase()] = parts[1];
+        const lines = trimmed.split('\n').map(l => l.trim()).filter(Boolean);
+        if (lines.length > 0) {
+          const headerParts = lines[0].split(/[,;\t]+/).map(s => s.trim()).filter(Boolean);
+          // Detect tabular CSV: > 5 headers and at least 2 lines (header + data row)
+          if (lines.length >= 2 && headerParts.length > 5) {
+            const valueParts = lines[1].split(/[,;\t]+/).map(s => s.trim()).filter(Boolean);
+            headerParts.forEach((h, i) => {
+              if (i < valueParts.length) geneMap[h] = valueParts[i];
+            });
+          } else {
+            // Two-column format: Key Value
+            lines.forEach((line) => {
+               // The original parsing was split(/[ ,:\t]+/)
+              const parts = line.split(/[ ,:\t]+/).filter(Boolean);
+              if (parts.length >= 2) {
+                geneMap[parts[0].toUpperCase()] = parts[1];
+              }
+            });
           }
-        });
+        }
+      }
+
+      // Normalise all keys to UPPERCASE
+      const upperMap: Record<string, any> = {};
+      Object.entries(geneMap).forEach(([k, v]) => { upperMap[k.toUpperCase()] = v; });
+
+      let importedAge: string | null = null;
+      let importedGender: 'male' | 'female' | null = null;
+      if (upperMap['AGE'] !== undefined) importedAge = String(Math.round(Number(upperMap['AGE'])));
+      if (upperMap['GENDER']) {
+        const gStr = String(upperMap['GENDER']).toLowerCase();
+        if (gStr === 'male' || gStr === 'female') importedGender = gStr as any;
       }
 
       setGenes((current) => {
         const next = { ...current };
         let count = 0;
         metadata.selected_genes.forEach((gene) => {
-          if (imported[gene.toUpperCase()] !== undefined) {
-            next[gene] = String(imported[gene.toUpperCase()]);
+          if (upperMap[gene.toUpperCase()] !== undefined) {
+            next[gene] = String(upperMap[gene.toUpperCase()]);
             count++;
           }
         });
         if (count > 0) {
+          if (importedAge !== null) setAge(importedAge);
+          if (importedGender !== null) setGender(importedGender);
           setShowImport(false);
           setImportText('');
           setError(null);
@@ -282,7 +316,7 @@ function App() {
         return next;
       });
     } catch {
-      setError('Import failed. Please ensure the file is a valid CSV or JSON report.');
+      setError('Import failed. Please ensure the file is a valid JSON or plain-text report.');
     }
   };
 
@@ -319,6 +353,21 @@ function App() {
     if (missing.length > 0) {
       setError(`Biomarker panel incomplete. First missing markers: ${missing.slice(0, 3).join(', ')}`);
       return;
+    }
+
+    // Warn about gene values that are outside a plausible log2(TPM+1) range
+    // but do not block submission — the user may have intentional extreme values.
+    const LOG2_RANGE_MIN = -10;
+    const LOG2_RANGE_MAX = 25;
+    const suspicious = metadata.selected_genes.filter((gene) => {
+      const v = Number(genes[gene]);
+      return isNaN(v) || v < LOG2_RANGE_MIN || v > LOG2_RANGE_MAX;
+    });
+    if (suspicious.length > 0) {
+      setError(
+        `Warning: ${suspicious.length} gene value(s) are outside the expected log₂ range [${LOG2_RANGE_MIN}, ${LOG2_RANGE_MAX}]. ` +
+        `Check biomarker input for ${suspicious.slice(0, 3).join(', ')}. Assessment will proceed.`,
+      );
     }
 
     try {
@@ -658,6 +707,11 @@ function App() {
                           <button className="btn btn-ghost" onClick={() => window.print()} style={{ width: '100%' }}>
                             Print Formal Report
                           </button>
+                          <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '10px', lineHeight: 1.5 }}>
+                            Survival ranges are population-level estimates derived from TCGA-GBM cohort benchmarks
+                            and published GBM literature. They are <strong>not</strong> patient-specific survival
+                            predictions.
+                          </p>
                         </div>
                       </div>
 
@@ -944,12 +998,22 @@ function App() {
                   that correlate with mortality outcomes.
                 </p>
                 
-                <div style={{ margin: '48px 0', padding: '32px', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)' }}>
-                  <h4>Clinical Research Disclaimer</h4>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                    This system is a clinical innovation prototype. The survival benchmarks (e.g., &gt;15 months, &lt;10 months) are based on historical 
-                    cohort data and literature. The provided mortality probability ("Analytical Signal") is for research use and must be 
-                    interpreted by a neuro-oncology specialist alongside longitudinal imaging, functional status, and standard pathology.
+                <div style={{ margin: '48px 0', padding: '32px', background: 'rgba(255,200,0,0.06)', border: '1px solid rgba(255,180,0,0.35)', borderRadius: '8px' }}>
+                  <h4 style={{ color: 'var(--brand-secondary)', marginBottom: '12px' }}>⚠ Research Prototype — Not for Clinical Use</h4>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                    This system is a <strong>BEng final-year research prototype</strong>. It has <strong>not</strong> been
+                    validated for clinical use, holds no regulatory approval (CE mark, FDA clearance, or equivalent),
+                    and must <strong>not</strong> be used to inform any clinical decision-making.
+                  </p>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                    The survival benchmarks (e.g., &gt;15 months, &lt;10 months) are population-level estimates from
+                    published TCGA-GBM cohort studies and literature. They are not patient-specific predictions.
+                    The provided mortality probability ("Analytical Signal") is for research exploration and must be
+                    interpreted by a qualified specialist alongside clinical imaging, pathology, and functional status.
+                  </p>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', opacity: 0.7 }}>
+                    Data source: The Cancer Genome Atlas Glioblastoma Multiforme (TCGA-GBM), NCI Genomic Data Commons.
+                    Model validated on a held-out cohort of 77 patients (TCGA). External generalisability has not been established.
                   </p>
                 </div>
                 

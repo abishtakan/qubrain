@@ -79,7 +79,7 @@
       "mean_val_balanced_accuracy": 0.6763296227581941,
       "mean_val_f1": 0.7363736677619129,
       "mean_val_specificity": 0.6893939393939394,
-      "mean_val_brier": 0.23214703798294067,
+      "mean_val_brier": 0.2321470312547118,
       "mean_overfit_gap_auc": 0.12510933537661995,
       "mean_best_epoch": 18.4,
       "mean_best_threshold": 0.502
@@ -104,7 +104,7 @@
       "mean_val_balanced_accuracy": 0.6183413729128014,
       "mean_val_f1": 0.7641535947712418,
       "mean_val_specificity": 0.509090909090909,
-      "mean_val_brier": 0.265716215968132,
+      "mean_val_brier": 0.2657161998703603,
       "mean_overfit_gap_auc": 0.07587188806053047,
       "mean_best_epoch": 3.2,
       "mean_best_threshold": 0.47400000000000003
@@ -129,7 +129,7 @@
       "mean_val_balanced_accuracy": 0.6458831168831167,
       "mean_val_f1": 0.7946628182789907,
       "mean_val_specificity": 0.5409090909090909,
-      "mean_val_brier": 0.24615705907344818,
+      "mean_val_brier": 0.2461570239754157,
       "mean_overfit_gap_auc": 0.12397454473451708,
       "mean_best_epoch": 10.2,
       "mean_best_threshold": 0.488
@@ -154,7 +154,7 @@
       "mean_val_balanced_accuracy": 0.634639455782313,
       "mean_val_f1": 0.6798742116389176,
       "mean_val_specificity": 0.6666666666666666,
-      "mean_val_brier": 0.22192035019397735,
+      "mean_val_brier": 0.22192036598918613,
       "mean_overfit_gap_auc": 0.1302506851056936,
       "mean_best_epoch": 17.0,
       "mean_best_threshold": 0.484
@@ -179,7 +179,7 @@
       "mean_val_balanced_accuracy": 0.6464100185528757,
       "mean_val_f1": 0.6687498954896686,
       "mean_val_specificity": 0.7136363636363636,
-      "mean_val_brier": 0.23382384777069093,
+      "mean_val_brier": 0.23382383425881023,
       "mean_overfit_gap_auc": 0.1768427690967832,
       "mean_best_epoch": 7.0,
       "mean_best_threshold": 0.48200000000000004
@@ -188,8 +188,8 @@
   "decision_threshold": 0.502,
   "final_training_epochs": 18,
   "train_metrics": {
-    "auc": 0.8462124359506994,
-    "pr_auc": 0.9531796128724217,
+    "auc": 0.8462816784378896,
+    "pr_auc": 0.9531819390691462,
     "accuracy": 0.755700325732899,
     "balanced_accuracy": 0.7634330425148872,
     "f1": 0.8329621380846325,
@@ -197,7 +197,7 @@
     "recall": 0.751004016064257,
     "specificity": 0.7758620689655172,
     "mcc": 0.43281970739761233,
-    "brier": 0.16479258239269257,
+    "brier": 0.1648353010441093,
     "threshold": 0.502,
     "confusion_matrix": {
       "tn": 45,
@@ -216,7 +216,7 @@
     "recall": 0.6349206349206349,
     "specificity": 0.7857142857142857,
     "mcc": 0.32671263530942823,
-    "brier": 0.19781580567359924,
+    "brier": 0.19786437999643094,
     "threshold": 0.502,
     "confusion_matrix": {
       "tn": 11,
@@ -231,11 +231,11 @@
     "upper": 0.9076131503920172
   },
   "risk_band_cutoffs": {
-    "low_upper": 0.4888186454772949,
-    "high_lower": 0.736794114112854
+    "low_upper": 0.48868227005004883,
+    "high_lower": 0.7367956638336182
   },
   "overfitting_analysis": {
-    "auc_gap": 0.09677932937473577,
+    "auc_gap": 0.09684857186192597,
     "balanced_accuracy_gap": 0.05311558219742696,
     "interpretation": "acceptable_generalization"
   },
@@ -352,62 +352,62 @@
     "top_global_features": [
       {
         "feature": "SUPT20HL1",
-        "mean_absolute_attribution": 0.05557047203183174,
-        "mean_signed_attribution": 0.025901852175593376,
+        "mean_absolute_attribution": 0.056395795196294785,
+        "mean_signed_attribution": 0.026656318455934525,
         "rank": 1
       },
       {
         "feature": "age",
-        "mean_absolute_attribution": 0.03862227872014046,
-        "mean_signed_attribution": -0.007833510637283325,
+        "mean_absolute_attribution": 0.03906271234154701,
+        "mean_signed_attribution": -0.00809654500335455,
         "rank": 2
       },
       {
         "feature": "IL9",
-        "mean_absolute_attribution": 0.032816603779792786,
-        "mean_signed_attribution": -0.026484264060854912,
+        "mean_absolute_attribution": 0.03288642317056656,
+        "mean_signed_attribution": -0.026469243690371513,
         "rank": 3
       },
       {
         "feature": "RAB6D",
-        "mean_absolute_attribution": 0.024198491126298904,
-        "mean_signed_attribution": -0.012584739364683628,
+        "mean_absolute_attribution": 0.024746594950556755,
+        "mean_signed_attribution": -0.012921095825731754,
         "rank": 4
       },
       {
         "feature": "ZNF676",
-        "mean_absolute_attribution": 0.021289806813001633,
-        "mean_signed_attribution": -0.01987525075674057,
+        "mean_absolute_attribution": 0.02146787755191326,
+        "mean_signed_attribution": -0.020046455785632133,
         "rank": 5
       },
       {
         "feature": "NOX4",
-        "mean_absolute_attribution": 0.020875491201877594,
-        "mean_signed_attribution": 0.003658836940303445,
+        "mean_absolute_attribution": 0.021073276177048683,
+        "mean_signed_attribution": 0.0037468746304512024,
         "rank": 6
       },
       {
         "feature": "C16orf87",
-        "mean_absolute_attribution": 0.01705537922680378,
-        "mean_signed_attribution": 0.0035599705297499895,
+        "mean_absolute_attribution": 0.01729009486734867,
+        "mean_signed_attribution": 0.003556356066837907,
         "rank": 7
       },
       {
         "feature": "RANBP17",
-        "mean_absolute_attribution": 0.01688297465443611,
-        "mean_signed_attribution": 0.012247730046510696,
+        "mean_absolute_attribution": 0.017044827342033386,
+        "mean_signed_attribution": 0.01239788718521595,
         "rank": 8
       },
       {
         "feature": "gender",
-        "mean_absolute_attribution": 0.016859816387295723,
-        "mean_signed_attribution": -0.016859816387295723,
+        "mean_absolute_attribution": 0.017022959887981415,
+        "mean_signed_attribution": -0.017022959887981415,
         "rank": 9
       },
       {
         "feature": "CYSLTR2",
-        "mean_absolute_attribution": 0.016433818265795708,
-        "mean_signed_attribution": -0.0035561539698392153,
+        "mean_absolute_attribution": 0.016603410243988037,
+        "mean_signed_attribution": -0.0034873606637120247,
         "rank": 10
       }
     ]

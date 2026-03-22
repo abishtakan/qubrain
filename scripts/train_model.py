@@ -1,3 +1,39 @@
+"""
+train_model.py — Research-grade training pipeline for the QuBrain hybrid
+quantum-classical GBM mortality-status classifier.
+
+Pipeline overview
+-----------------
+1. Load and align the TCGA-GBM RNA-seq expression matrix with clinical labels.
+2. Create a stratified outer 80/20 holdout split (the holdout set is never used
+   for any tuning or selection decision).
+3. Run an inner 5-fold stratified cross-validation hyperparameter search over
+   the predefined search space. Feature selection, scaling, and class balancing
+   are all fitted inside each training fold to prevent information leakage.
+4. Select the best configuration by mean validation ROC-AUC.
+5. Retrain the selected configuration on the full training split for a fixed
+   number of epochs derived from the cross-validation.
+6. Evaluate once on the untouched holdout set and compute bootstrap CIs.
+7. Compute global Integrated Gradients explainability on holdout samples.
+8. Save all artifacts (model, preprocessing, metadata, CV results,
+   holdout predictions, explainability, and the markdown research report).
+
+Usage
+-----
+    python scripts/train_model.py          # full hyperparameter search
+    python scripts/train_model.py --quick  # reduced search for smoke testing
+
+Artifacts written
+-----------------
+    backend/model_artifacts/hybrid_model_state.pt
+    backend/model_artifacts/preprocessing.joblib
+    backend/model_artifacts/metadata.json
+    backend/model_artifacts/cv_results.csv
+    backend/model_artifacts/holdout_predictions.csv
+    backend/model_artifacts/test_patients.json
+    backend/model_artifacts/explainability.json
+    backend/model_artifacts/research_report.md
+"""
 from __future__ import annotations
 
 import argparse
@@ -36,9 +72,9 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from qubrain.backend.app.hybrid_model import HybridQuantumClassifier
-from qubrain.backend.app.explainability import build_global_explainability, integrated_gradients
+from qubrain.backend.app.explainability import build_global_explainability, shap_explain
 
-DATA_DIR = PROJECT_ROOT / "data"
+DATA_DIR = PROJECT_ROOT / "qubrain" / "data"
 ARTIFACT_DIR = PROJECT_ROOT / "qubrain" / "backend" / "model_artifacts"
 ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -51,6 +87,13 @@ DEVICE = torch.device("cpu")
 
 @dataclass(frozen=True)
 class ModelConfig:
+    """
+    Immutable hyperparameter configuration for one candidate model.
+
+    Each field corresponds to a tuneable dimension in the search space.
+    The dataclass is frozen so that instances can be hashed and used as
+    dictionary keys in aggregation steps.
+    """
     n_top_genes: int
     n_qubits: int
     n_layers: int
@@ -69,6 +112,7 @@ class ModelConfig:
 
 @dataclass
 class Dataset:
+    """Container for the fully aligned, label-annotated TCGA-GBM dataset."""
     age: np.ndarray
     gender: np.ndarray
     genes: np.ndarray
@@ -78,6 +122,7 @@ class Dataset:
 
 @dataclass
 class TrainingOutcome:
+    """Results produced by a single fold's training run, stored for aggregation."""
     model: HybridQuantumClassifier
     train_probs: np.ndarray
     val_probs: np.ndarray
@@ -88,12 +133,19 @@ class TrainingOutcome:
 
 
 def set_seeds(seed: int = SEED) -> None:
+    """Seed Python, NumPy, and PyTorch RNGs for reproducibility."""
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
 
 
 def _load_single_gene_file(filepath: Path) -> pd.Series | None:
+    """
+    Parse one STAR gene-count TSV file and return a Series of protein-coding
+    TPM values indexed by gene name.
+
+    Returns None if the file is missing required columns or cannot be parsed.
+    """
     try:
         df = pd.read_csv(filepath, sep="\t", skiprows=1, low_memory=False)
         if "gene_name" not in df.columns or "tpm_unstranded" not in df.columns:
@@ -101,12 +153,24 @@ def _load_single_gene_file(filepath: Path) -> pd.Series | None:
         if "gene_type" in df.columns:
             df = df[df["gene_type"] == "protein_coding"]
         return df[["gene_name", "tpm_unstranded"]].dropna().set_index("gene_name")["tpm_unstranded"]
-    except Exception as exc:  # pragma: no cover
+    except Exception as exc:
         print(f"Failed to read {filepath}: {exc}")
         return None
 
 
 def load_expression_matrix() -> pd.DataFrame:
+    """
+    Discover and load all STAR gene-count files under ``data/gene_expression/``.
+
+    Each file contributes one row (sample) to the expression matrix. Only
+    protein-coding genes are retained and expression is log2-transformed:
+    ``log2(TPM + 1)``.
+
+    Returns
+    -------
+    pd.DataFrame
+        Shape (n_samples, n_genes), rows indexed by GDC file ID.
+    """
     gene_dir = DATA_DIR / "gene_expression"
     gene_files = sorted(gene_dir.rglob("*star_gene_counts*.tsv"))
     if not gene_files:
@@ -125,6 +189,18 @@ def load_expression_matrix() -> pd.DataFrame:
 
 
 def load_clinical_data() -> pd.DataFrame:
+    """
+    Load the TCGA-GBM clinical TSV and build binary mortality labels.
+
+    The target variable is derived from ``demographic.vital_status``:
+    ``1 = Dead``, ``0 = Alive``. Missing age and gender values are imputed
+    with the median and mode respectively.
+
+    Returns
+    -------
+    pd.DataFrame
+        Columns: case_id, age, gender (0/1), target (0/1).
+    """
     clinical_file = DATA_DIR / "clinical.project-tcga-gbm.2026-01-08" / "clinical.tsv"
     df = pd.read_csv(clinical_file, sep="\t", low_memory=False)
 
@@ -148,6 +224,13 @@ def load_clinical_data() -> pd.DataFrame:
 
 
 def load_aligned_dataset() -> Dataset:
+    """
+    Join the expression matrix and clinical data via the GDC file-to-case ID
+    mapping and return a single aligned ``Dataset``.
+
+    Only samples that have both valid expression data AND a binary vital-status
+    label are retained. Duplicate file IDs are dropped.
+    """
     expression = load_expression_matrix()
     clinical = load_clinical_data()
 
@@ -177,6 +260,20 @@ def select_genes(
     gene_names: list[str],
     n_top_genes: int,
 ) -> tuple[np.ndarray, list[str]]:
+    """
+    Select the top ``n_top_genes`` genes from the training partition using
+    univariate ANOVA F-statistic (``SelectKBest(f_classif)``).
+
+    Zero-variance genes are filtered out first to avoid division-by-zero in
+    the F-test. Feature selection is fitted on training data only to prevent
+    leakage into the validation or test fold.
+
+    Returns
+    -------
+    tuple
+        ``(selected_indices, selected_gene_names)`` — integer column indices
+        into the full gene matrix and the corresponding gene name strings.
+    """
     # Fit feature ranking on training data only.
     non_constant_indices = np.where(np.var(train_genes, axis=0) > 0)[0]
     filtered_genes = train_genes[:, non_constant_indices]
@@ -194,6 +291,12 @@ def build_selected_matrix(
     genes: np.ndarray,
     selected_idx: np.ndarray,
 ) -> np.ndarray:
+    """
+    Assemble the final feature matrix ``[age, gender, gene_1, ..., gene_k]``
+    by concatenating clinical covariates with the selected gene columns.
+
+    Returns a float32 array of shape (n_samples, 2 + len(selected_idx)).
+    """
     # Combine clinical covariates with selected genes.
     clinical = np.column_stack([age, gender])
     selected_genes = genes[:, selected_idx]
@@ -201,6 +304,7 @@ def build_selected_matrix(
 
 
 def fit_scaler(X_train: np.ndarray) -> MinMaxScaler:
+    """Fit a MinMaxScaler on ``X_train`` and return it (not yet applied)."""
     scaler = MinMaxScaler()
     scaler.fit(X_train)
     return scaler
@@ -212,6 +316,14 @@ def threshold_grid() -> np.ndarray:
 
 
 def choose_threshold(y_true: np.ndarray, probs: np.ndarray) -> float:
+    """
+    Select the decision threshold that maximises balanced accuracy on the
+    provided ground-truth labels and predicted probabilities.
+
+    Searches over 81 evenly spaced candidate values in ``[0.1, 0.9]``.
+    Using balanced accuracy as the selection metric is appropriate for
+    imbalanced classes because it weights sensitivity and specificity equally.
+    """
     best_threshold = 0.5
     best_score = -1.0
     for threshold in threshold_grid():
@@ -229,6 +341,16 @@ def evaluate_predictions(
     probs: np.ndarray,
     threshold: float,
 ) -> dict[str, float | dict[str, int]]:
+    """
+    Compute the full suite of classification metrics at a given threshold.
+
+    Metrics returned: ROC-AUC, PR-AUC, accuracy, balanced accuracy, F1,
+    precision, recall, specificity, MCC, Brier score, and the full
+    confusion matrix (TN, FP, FN, TP).
+
+    AUC is threshold-independent; all other metrics use ``threshold`` to
+    binarise the probability scores.
+    """
     preds = (probs >= threshold).astype(int)
     tn, fp, fn, tp = confusion_matrix(y_true, preds, labels=[0, 1]).ravel()
     specificity = float(tn / (tn + fp)) if (tn + fp) else 0.0
@@ -259,6 +381,21 @@ def bootstrap_auc_ci(
     n_bootstrap: int = FINAL_BOOTSTRAP_SAMPLES,
     seed: int = SEED,
 ) -> dict[str, float]:
+    """
+    Estimate a 95% bootstrap confidence interval for holdout ROC-AUC.
+
+    Resamples the holdout set ``n_bootstrap`` times with replacement and
+    computes AUC on each resample. The 2.5th and 97.5th percentiles of the
+    resulting distribution form the lower and upper CI bounds.
+
+    Bootstraps that yield only one class in the resample are skipped to
+    avoid AUC being undefined.
+
+    Returns
+    -------
+    dict
+        ``{"mean": ..., "lower": ..., "upper": ...}`` — all float.
+    """
     # Estimate holdout AUC confidence interval.
     rng = np.random.default_rng(seed)
     aucs: list[float] = []
@@ -281,6 +418,14 @@ def bootstrap_auc_ci(
 
 
 def compute_risk_band_cutoffs(probs: np.ndarray, default_threshold: float) -> dict[str, float]:
+    """
+    Derive risk-band probability cutoffs from training score quantiles.
+
+    The low/moderate/high bands are defined by the 33rd and 67th percentiles
+    of the training set predicted probabilities. If these quantiles are
+    degenerate (high_lower <= low_upper), symmetric offsets around the
+    decision threshold are used as a fallback.
+    """
     # Derive risk bands from training-score quantiles.
     low_upper = float(np.quantile(probs, 0.33))
     high_lower = float(np.quantile(probs, 0.67))
@@ -296,6 +441,12 @@ def compute_risk_band_cutoffs(probs: np.ndarray, default_threshold: float) -> di
 
 
 def compute_class_weights(y: np.ndarray) -> dict[int, float]:
+    """
+    Compute inverse-frequency class weights for an imbalanced binary target.
+
+    The weight for each class c is: ``total / (2 * count_c)``. This gives
+    equal total loss contribution to both classes regardless of imbalance ratio.
+    """
     # Compute class weights for imbalanced labels.
     counts = np.bincount(y.astype(int), minlength=2).astype(float)
     total = float(counts.sum())
@@ -311,6 +462,26 @@ def apply_imbalance_strategy(
     strategy: str,
     seed: int,
 ) -> tuple[np.ndarray, np.ndarray, dict[int, float] | None]:
+    """
+    Apply the selected class-imbalance handling strategy to the training data.
+
+    Must be called ONLY on the training partition (never on validation or test
+    data) to prevent information leakage.
+
+    Parameters
+    ----------
+    strategy : str
+        One of:
+        - ``"smote"``        — oversample the minority class with SMOTE.
+        - ``"class_weight"`` — compute per-sample weights for the loss function.
+        - ``"none"``         — no balancing.
+
+    Returns
+    -------
+    tuple
+        ``(X_fit, y_fit, class_weights)`` — X_fit and y_fit are the (possibly
+        resampled) training arrays; class_weights is a dict or None.
+    """
     if strategy == "smote":
         # Apply SMOTE on the training partition only.
         minority_count = int(np.bincount(y_train.astype(int), minlength=2).min())
@@ -329,12 +500,28 @@ def apply_imbalance_strategy(
 
 
 class EntropyRegularizedBCELoss(nn.Module):
+    """
+    Binary cross-entropy loss with optional per-class weighting and entropy
+    regularisation.
+
+    Class weighting addresses the 81/19 class imbalance by scaling each
+    sample's loss by its inverse-frequency weight.
+
+    Entropy regularisation adds ``lambda_entropy * H(p)`` to the loss, which
+    penalises over-confident predictions and acts as a form of soft calibration
+    to prevent the model from collapsing to a trivial majority-class output.
+    Setting ``lambda_entropy = 0`` disables this term.
+    """
     def __init__(self, class_weights: dict[int, float] | None, lambda_entropy: float) -> None:
         super().__init__()
         self.class_weights = class_weights
         self.lambda_entropy = lambda_entropy
 
     def forward(self, pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        """
+        Compute the (optionally weighted, optionally entropy-regularised)
+        binary cross-entropy for a batch of predictions.
+        """
         epsilon = 1e-8
         p = torch.clamp(pred, epsilon, 1 - epsilon)
         # BCE with optional entropy regularization.
@@ -354,6 +541,7 @@ class EntropyRegularizedBCELoss(nn.Module):
 
 
 def instantiate_model(config: ModelConfig, n_features: int) -> HybridQuantumClassifier:
+    """Build a HybridQuantumClassifier from a ModelConfig and feature count."""
     return HybridQuantumClassifier(
         n_features=n_features,
         n_qubits=config.n_qubits,
@@ -366,6 +554,7 @@ def instantiate_model(config: ModelConfig, n_features: int) -> HybridQuantumClas
 
 
 def infer_probabilities(model: HybridQuantumClassifier, X: np.ndarray) -> np.ndarray:
+    """Run the model in eval mode and return positive-class probabilities as a NumPy array."""
     model.eval()
     with torch.no_grad():
         # Return positive-class probabilities.
@@ -380,6 +569,23 @@ def fit_hybrid_with_validation(
     config: ModelConfig,
     seed: int,
 ) -> TrainingOutcome:
+    """
+    Train a HybridQuantumClassifier on one fold with early stopping.
+
+    The best model state (by validation AUC) is checkpointed and restored at
+    the end of training. The decision threshold is also selected on the
+    validation fold using balanced accuracy as the criterion.
+
+    Class imbalance handling and the custom entropy-regularised BCE loss are
+    applied only to the training partition — the validation set is never
+    modified or balanced.
+
+    Returns
+    -------
+    TrainingOutcome
+        Contains the best model, predicted probabilities, best epoch and
+        threshold, and train/val metric dicts.
+    """
     # Apply imbalance handling to fit data only.
     X_fit, y_fit, class_weights = apply_imbalance_strategy(X_train, y_train, config.imbalance_strategy, seed)
     train_loader = DataLoader(
@@ -435,7 +641,7 @@ def fit_hybrid_with_validation(
         if patience_counter >= config.patience:
             break
 
-    if best_state is None:  # pragma: no cover
+    if best_state is None: 
         raise RuntimeError("Training failed to produce a valid model state.")
 
     model.load_state_dict(best_state)
@@ -462,6 +668,14 @@ def fit_final_model(
     fixed_epochs: int,
     seed: int,
 ) -> HybridQuantumClassifier:
+    """
+    Retrain the best configuration on the full training split.
+
+    Unlike ``fit_hybrid_with_validation``, there is no validation set or
+    early stopping here. The number of epochs is fixed to the mean best epoch
+    observed across the inner cross-validation folds, avoiding the need to
+    hold out any data from the final training set.
+    """
     # Retrain the selected configuration on the full training split.
     X_fit, y_fit, class_weights = apply_imbalance_strategy(X_train, y_train, config.imbalance_strategy, seed)
     train_loader = DataLoader(
@@ -500,6 +714,14 @@ def aggregate_fold_results(
     config: ModelConfig,
     fold_results: list[TrainingOutcome],
 ) -> dict[str, float | str | int]:
+    """
+    Average per-fold metrics for a single candidate configuration.
+
+    Returns a flat dict merging the config hyperparameters with mean
+    train/val AUC, balanced accuracy, F1, specificity, Brier score, best
+    epoch, best threshold, and the overfitting gap (train minus val AUC).
+    This dict forms one row of the CV results table.
+    """
     # Aggregate fold metrics for model selection.
     mean_train_auc = float(np.mean([result.train_metrics["auc"] for result in fold_results]))
     mean_val_auc = float(np.mean([result.val_metrics["auc"] for result in fold_results]))
@@ -526,6 +748,12 @@ def aggregate_fold_results(
 
 
 def rank_candidate_results(results: list[dict[str, float | str | int]]) -> pd.DataFrame:
+    """
+    Sort candidate configurations by mean validation AUC (descending),
+    then balanced accuracy (descending), then Brier score (ascending).
+
+    Returns a DataFrame where row 0 is the best configuration.
+    """
     df = pd.DataFrame(results)
     return df.sort_values(
         by=["mean_val_auc", "mean_val_balanced_accuracy", "mean_val_brier"],
@@ -534,6 +762,14 @@ def rank_candidate_results(results: list[dict[str, float | str | int]]) -> pd.Da
 
 
 def build_search_space(quick: bool) -> list[ModelConfig]:
+    """
+    Return the list of candidate ``ModelConfig`` objects to evaluate.
+
+    When ``quick=True`` a reduced set of 5 configurations is returned for
+    fast smoke-testing. The full search space contains 8 configurations
+    covering different qubit counts, layer depths, learning rates, dropout
+    values, entropy regularisation strengths, and imbalance strategies.
+    """
     if quick:
         # Reduced search space for smoke tests.
         return [
@@ -631,6 +867,22 @@ def run_inner_cv_search(
     gene_names: list[str],
     quick: bool,
 ) -> tuple[ModelConfig, pd.DataFrame]:
+    """
+    Run a stratified inner 5-fold cross-validation hyperparameter search.
+
+    For each candidate configuration in ``build_search_space()``, trains one
+    model per fold with ``fit_hybrid_with_validation`` and aggregates the
+    fold metrics. The candidates are then ranked and the best configuration
+    is returned for final training.
+
+    All preprocessing (feature selection, scaling, class balancing) is applied
+    strictly inside each training fold to prevent leakage.
+
+    Returns
+    -------
+    tuple
+        ``(best_config, ranked_results_dataframe)``.
+    """
     splitter = StratifiedKFold(n_splits=INNER_CV_FOLDS, shuffle=True, random_state=SEED)
     candidate_results: list[dict[str, float | str | int]] = []
     search_space = build_search_space(quick=quick)
@@ -710,6 +962,14 @@ def export_test_patients(
     selected_gene_names: list[str],
     threshold: float,
 ) -> list[dict[str, object]]:
+    """
+    Generate a JSON-serialisable list of holdout patient records for the
+    frontend demo and manual inspection.
+
+    Each record includes the patient's demographics, gene expression values
+    (unscaled, in log2 space), actual vital status, model-predicted status,
+    and predicted mortality probability.
+    """
     # Export holdout examples for inspection and demo use.
     probs = infer_probabilities(model, X_test_scaled.astype(np.float32))
     patients: list[dict[str, object]] = []
@@ -730,6 +990,7 @@ def export_test_patients(
 
 
 def summarize_dataset(dataset: Dataset, train_idx: np.ndarray, test_idx: np.ndarray) -> dict[str, object]:
+    """Build a JSON-serialisable summary of the dataset composition and train/holdout split sizes."""
     train_y = dataset.labels[train_idx]
     test_y = dataset.labels[test_idx]
     return {
@@ -756,6 +1017,14 @@ def summarize_dataset(dataset: Dataset, train_idx: np.ndarray, test_idx: np.ndar
 
 
 def write_markdown_report(metadata: dict[str, object], cv_results: pd.DataFrame, report_path: Path) -> None:
+    """
+    Render a human-readable Markdown research report from the training metadata
+    and CV results table, and write it to ``report_path``.
+
+    The report includes the task definition, dataset summary, methodology
+    description, selected hyperparameters, cross-validation rankings, final
+    performance metrics, overfitting analysis, and global explainability.
+    """
     dataset_summary = metadata["dataset_summary"]
     selected_hyperparameters = metadata["selected_hyperparameters"]
     holdout_metrics = metadata["holdout_metrics"]
@@ -866,6 +1135,15 @@ def write_markdown_report(metadata: dict[str, object], cv_results: pd.DataFrame,
 
 
 def main() -> None:
+    """
+    Entry point for the full research training pipeline.
+
+    Orchestrates: dataset loading → outer holdout split → inner CV search
+    → final model training → holdout evaluation → explainability computation
+    → artifact export.
+
+    Pass ``--quick`` for a smoke-test run with a reduced search space.
+    """
     parser = argparse.ArgumentParser(description="Train the research-grade hybrid quantum-classical model.")
     parser.add_argument(
         "--quick",
@@ -940,11 +1218,10 @@ def main() -> None:
     risk_band_cutoffs = compute_risk_band_cutoffs(train_probs, decision_threshold)
     feature_order = ["age", "gender"] + selected_gene_names
     # Compute explainability on holdout samples.
-    holdout_attributions = integrated_gradients(
+    holdout_attributions = shap_explain(
         model=final_model,
         inputs=X_test_scaled,
         baseline=reference_scaled,
-        steps=24,
         device="cpu",
     )
     explainability = build_global_explainability(

@@ -42,7 +42,7 @@ Top candidates:
 - genes=50, qubits=4, layers=2, imbalance=smote, mean_val_auc=0.6587, mean_overfit_gap=0.1768
 
 ## Final Performance
-- Train AUC: 0.8462
+- Train AUC: 0.8463
 - Holdout AUC: 0.7494
 - Holdout AUC 95% bootstrap CI: [0.5771, 0.9076]
 - Holdout PR AUC: 0.8904
@@ -53,7 +53,7 @@ Top candidates:
 - Holdout recall: 0.6349
 - Holdout specificity: 0.7857
 - Holdout MCC: 0.3267
-- Holdout Brier score: 0.1978
+- Holdout Brier score: 0.1979
 - Risk band cutoffs: low <= 0.489, high >= 0.737
 
 ## Overfitting Check
@@ -72,13 +72,13 @@ Top candidates:
 - Global feature importance is the mean absolute Integrated Gradients attribution on the outer holdout cohort.
 
 Top global features:
-- SUPT20HL1: mean_abs_attr=0.0556, mean_signed_attr=0.0259
-- age: mean_abs_attr=0.0386, mean_signed_attr=-0.0078
-- IL9: mean_abs_attr=0.0328, mean_signed_attr=-0.0265
-- RAB6D: mean_abs_attr=0.0242, mean_signed_attr=-0.0126
-- ZNF676: mean_abs_attr=0.0213, mean_signed_attr=-0.0199
-- NOX4: mean_abs_attr=0.0209, mean_signed_attr=0.0037
-- C16orf87: mean_abs_attr=0.0171, mean_signed_attr=0.0036
-- RANBP17: mean_abs_attr=0.0169, mean_signed_attr=0.0122
-- gender: mean_abs_attr=0.0169, mean_signed_attr=-0.0169
-- CYSLTR2: mean_abs_attr=0.0164, mean_signed_attr=-0.0036
+- SUPT20HL1: mean_abs_attr=0.0564, mean_signed_attr=0.0267
+- age: mean_abs_attr=0.0391, mean_signed_attr=-0.0081
+- IL9: mean_abs_attr=0.0329, mean_signed_attr=-0.0265
+- RAB6D: mean_abs_attr=0.0247, mean_signed_attr=-0.0129
+- ZNF676: mean_abs_attr=0.0215, mean_signed_attr=-0.0200
+- NOX4: mean_abs_attr=0.0211, mean_signed_attr=0.0037
+- C16orf87: mean_abs_attr=0.0173, mean_signed_attr=0.0036
+- RANBP17: mean_abs_attr=0.0170, mean_signed_attr=0.0124
+- gender: mean_abs_attr=0.0170, mean_signed_attr=-0.0170
+- CYSLTR2: mean_abs_attr=0.0166, mean_signed_attr=-0.0035

@@ -38,8 +38,9 @@ Thumbs.db
 .vscode/
 
 # Model artifact binaries (large trained model files)
-backend/model_artifacts/*.pt
-backend/model_artifacts/*.joblib
+# (Commented out so they push to GitHub for Render!)
+# backend/model_artifacts/*.pt
+# backend/model_artifacts/*.joblib
 
 # Raw dataset (TCGA data, not redistributable)
 data/

@@ -3,46 +3,57 @@ from __future__ import annotations
 from typing import Any
 
 import numpy as np
+import shap
 import torch
 
 from .hybrid_model import HybridQuantumClassifier
 
 
-def integrated_gradients(
+def shap_explain(
     model: HybridQuantumClassifier,
     inputs: np.ndarray,
     baseline: np.ndarray,
-    steps: int = 24,
     device: str = "cpu",
 ) -> np.ndarray:
+    """
+    Compute feature contributions using shap.GradientExplainer, which computes 
+    expected gradients combining ideas from Integrated Gradients and SHAP.
+    """
     model.eval()
 
     input_array = np.asarray(inputs, dtype=np.float32)
     if input_array.ndim == 1:
         input_array = input_array.reshape(1, -1)
 
-    baseline_array = np.asarray(baseline, dtype=np.float32).reshape(-1)
+    # GradientExplainer expects exactly the baseline distribution as a background dataset
+    # We expand the single-vector baseline into a required format
+    baseline_array = np.asarray(baseline, dtype=np.float32).reshape(1, -1)
+    
+    input_t = torch.from_numpy(input_array).to(device)
     baseline_t = torch.from_numpy(baseline_array).to(device)
-    alphas = torch.linspace(0.0, 1.0, steps + 1, device=device)[1:]
 
-    attributions: list[np.ndarray] = []
-    for row in input_array:
-        input_t = torch.from_numpy(row).to(device)
-        total_grads = torch.zeros_like(input_t)
-        delta = input_t - baseline_t
+    # SHAP internally expects the model output to be 2D: (batch_size, num_classes).
+    # Our model returns a 1D tensor (batch_size,) for binary classification probability.
+    # We use a simple wrapper to provide the expected 2D shape.
+    class ModelWrapper(torch.nn.Module):
+        def __init__(self, base_model):
+            super().__init__()
+            self.base_model = base_model
+        def forward(self, x):
+            return self.base_model(x).unsqueeze(1)
+            
+    wrapped_model = ModelWrapper(model)
 
-        for alpha in alphas:
-            model.zero_grad(set_to_none=True)
-            interpolated = (baseline_t + (alpha * delta)).unsqueeze(0).clone().detach().requires_grad_(True)
-            output = model(interpolated)
-            output.backward(torch.ones_like(output))
-            total_grads += interpolated.grad.detach()[0]
-
-        average_grads = total_grads / float(len(alphas))
-        attribution = (delta * average_grads).detach().cpu().numpy().astype(np.float32)
-        attributions.append(attribution)
-
-    return np.vstack(attributions)
+    # Initialize Explainer
+    explainer = shap.GradientExplainer(wrapped_model, baseline_t)
+    
+    # explainer.shap_values returns a list of arrays (one for each output, though we have 1 risk output)
+    # or a single numpy array depending on shap version.
+    shap_vals = explainer.shap_values(input_t)
+    if isinstance(shap_vals, list):
+        shap_vals = shap_vals[0]
+        
+    return np.asarray(shap_vals, dtype=np.float32)
 
 
 def build_global_explainability(
@@ -71,8 +82,8 @@ def build_global_explainability(
         row["rank"] = rank
 
     return {
-        "method": "Integrated Gradients",
-        "aggregation": "Mean absolute attribution on the outer holdout cohort",
+        "method": "Gradient SHAP",
+        "aggregation": "Mean absolute SHAP value on the outer holdout cohort",
         "feature_importance": rows,
     }
 

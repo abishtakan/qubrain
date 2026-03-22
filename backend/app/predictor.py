@@ -9,7 +9,7 @@ import numpy as np
 import torch
 
 from .config import EXPLAINABILITY_PATH, METADATA_PATH, MODEL_PATH, PREPROCESS_PATH, SAMPLES_PATH
-from .explainability import build_local_explanation, integrated_gradients
+from .explainability import build_local_explanation, shap_explain
 from .hybrid_model import HybridQuantumClassifier
 
 
@@ -94,11 +94,10 @@ class ProductionPredictor:
         with torch.no_grad():
             mortality_probability = float(self.model(torch.from_numpy(scaled)).item())
 
-        attributions = integrated_gradients(
+        attributions = shap_explain(
             model=self.model,
             inputs=scaled,
             baseline=self.reference_scaled,
-            steps=24,
             device="cpu",
         )[0]
         local = build_local_explanation(
@@ -110,8 +109,8 @@ class ProductionPredictor:
         )
 
         return {
-            "method": "Integrated Gradients",
-            "baseline_description": "Attributions are computed relative to the median feature profile of the training cohort.",
+            "method": "Gradient SHAP",
+            "baseline_description": "SHAP values represent the feature's contribution compared to the median training cohort.",
             "prediction": "Dead" if mortality_probability >= self.decision_threshold else "Alive",
             "mortality_probability": mortality_probability,
             "decision_threshold": self.decision_threshold,
